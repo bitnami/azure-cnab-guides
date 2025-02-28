@@ -63,7 +63,7 @@ If Creating a New Kubernetes Cluster
 3. Only lowercase alphanumeric characters are allowed, and the value must be 6-30 characters long.
 4. Installation namespace: The Kubernetes namespace in which the extension will be installed. If the namespace does not exist, it will be created.
 5. Allow extension auto upgrades of minor versions: Whether to allow auto upgrades of minor versions for the extension.
-6. Application parameters (optional): Parameters are optional, for a quick start, the application can be launched with the default configuration. The link below lists the parameters that can be configured during installation for advanced customization. [charts/bitnami/clickhouse at main · bitnami/charts](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse)
+6. Application parameters (optional): Parameters are optional, for a quick start, the application can be launched with the default configuration. The link below lists the parameters that can be configured during installation for advanced customization. [charts/bitnami/argocd at main · bitnami/charts](https://github.com/bitnami/charts/tree/main/bitnami/argocd)
 7. Enable multi line values: Enable this option when some of the parameter values specified above need to be multi line strings. It will be activated or deactivated for new rows.
 
 #### Under “Usage Instructions” Tab
@@ -111,7 +111,7 @@ To install the AKS extension, input the following command into the command line:
 ```console
 az k8s-extension create  
   --name \[insert extension name\]  
-  --extension-type Bitnami.ClickHouseMain  
+  --extension-type Bitnami.ArgoCDMain  
   --scope namespace  
   --cluster-name \[insert existing AKS cluster name\]  
   --resource-group \[insert resource group name\]  
@@ -126,7 +126,7 @@ az k8s-extension create  
 
 Make sure to replace the placeholders (e.g., `[insert extension name]`, `[insert existing AKS cluster name]`, `[insert resource group name]`) with your specific details.
 
-Example: `az k8s-extension create --name clickhouse2 --extension-type Bitnami.ClickHouseMain --scope namespace --cluster-name myAKScluster --resource-group myResourceGroup --cluster-type managedClusters --plan-name main --plan-product clickhouse-cnab --plan-publisher bitnami --target-namespace clickhouse --configuration-settings replicaCount=2 memoryHighWatermark.enabled="true" memoryHighWatermark.type="absolute" memoryHighWatermark.value="512Mi"`
+Example: `az k8s-extension create --name clickhouse2 --extension-type Bitnami.ArgoCDMain --scope namespace --cluster-name myAKScluster --resource-group myResourceGroup --cluster-type managedClusters --plan-name main --plan-product clickhouse-cnab --plan-publisher bitnami --target-namespace clickhouse --configuration-settings replicaCount=2 memoryHighWatermark.enabled="true" memoryHighWatermark.type="absolute" memoryHighWatermark.value="512Mi"`
 
 ### Terraform deployment
 
@@ -171,7 +171,7 @@ resource "azurerm_kubernetes_cluster" "aks" { 
 resource "azurerm_kubernetes_cluster_extension" "clickhouse" { 
   name                 = "\[insert extension name\]" 
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id 
-  extension_type       = "Bitnami.ClickHouseMain" 
+  extension_type       = "Bitnami.ArgoCDMain" 
   scope { 
     namespace = "clickhouse" 
   } 
@@ -191,7 +191,8 @@ resource "azurerm_kubernetes_cluster_extension" "clickhouse" { 
 **AKS cluster name** - The name of the AKS cluster.  
 **Resource group name** - The name of the resource group where AKS cluster is located.  
 **Extension name** - Name of the extension
-**Deploy the application**  
+
+## Deploy the application
 
 1. Deploy the application with default configuration for azure-vote.  
 
@@ -199,7 +200,7 @@ resource "azurerm_kubernetes_cluster_extension" "clickhouse" { 
 terraform apply 
 ```
 
-### Step 3: Access ArgoCD
+### Access ArgoCD
 
 1. Get ArgoCD credentials:
 
