@@ -237,6 +237,7 @@ In order to use SSO you need to enable Dex by setting `dex.enabled=true`. You ca
 
 > [!NOTE]
 > `dex.config` is the key of the object. IF you are using the Helm CLI to set the parameter you need to scape the `.` like `--set server.config.dex\.config`.
+
 > [!IMPORTANT]
 > If you enable Dex without configuring it you will get an error similar to `msg="dex is not configured"`, and the Dex pod will never reach the running state.
 
