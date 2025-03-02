@@ -48,6 +48,8 @@ If Using an Existing Kubernetes Cluster
 
 1. Kubernetes Cluster (AKS) Name: The resource name of the existing managed Kubernetes cluster (AKS) in which the extension will be installed.
 
+![ui2](../images/argocd/image2.png)
+
 If Creating a New Kubernetes Cluster
 
 1. Kubernetes Cluster (AKS) Name: The name of a new managed Kubernetes cluster (AKS) in which the extension will be installed. Use only allowed characters.
@@ -55,6 +57,8 @@ If Creating a New Kubernetes Cluster
 3. VM size: The size of virtual machine for the managed Kubernetes cluster nodes.
 4. Enable auto scaling: Whether to enable auto-scaler for the number of nodes in the managed Kubernetes cluster.
 5. Number of agents: Number agent nodes in the managed Kubernetes cluster.
+
+![ui3](../images/argocd/image3.png)
 
 #### Under “Application Details” Tab
 
@@ -66,11 +70,15 @@ If Creating a New Kubernetes Cluster
 6. Application parameters (optional): Parameters are optional, for a quick start, the application can be launched with the default configuration. The link below lists the parameters that can be configured during installation for advanced customization. [charts/bitnami/argocd at main · bitnami/charts](https://github.com/bitnami/charts/tree/main/bitnami/argocd)
 7. Enable multi line values: Enable this option when some of the parameter values specified above need to be multi line strings. It will be activated or deactivated for new rows.
 
+![ui4](../images/argocd/image4.png)
+
 #### Under “Usage Instructions” Tab
 
 1. The deployment notes of this solution provide useful information regarding how to access the application and the different parameters that have been generated during the deployment. Please take a look at the following guide to know more about it.
 
 [Usage instructions for Azure Marketplace Kubernetes Applications](https://docs.bitnami.com/azure/faq/get-started/usage-instructions-cnab/)
+
+![ui5](../images/argocd/image5.png)
 
 #### Under “Review + Create”
 
@@ -144,7 +152,7 @@ terraform init  
 ```
 
 1. Create a new directory for your Terraform configuration files and navigate to it.
-2. Create a file named main.tf containing the following:
+2. Create a file named `main.tf` containing the following:
 
 ```text
 provider "azurerm" { 
@@ -211,8 +219,8 @@ echo "Password: $(kubectl -n default get secret argocd-secret -o jsonpath="{.dat
 
 1. Access ArgoCD UI with the above-obtained credentials:
 
-![login](../images/argocd/image2.png)
-![logged in](../images/argocd/image3.png)
+![login](../images/argocd/image6.png)
+![logged in](../images/argocd/image7.png)
 
 ## Configuration and installation details
 

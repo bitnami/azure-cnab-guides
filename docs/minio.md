@@ -69,7 +69,7 @@ If Creating a New Kubernetes Cluster
 3. Only lowercase alphanumeric characters are allowed, and the value must be 6-30 characters long.
 4. Installation namespace: The Kubernetes namespace in which the extension will be installed. If the namespace does not exist, it will be created.
 5. Allow extension auto upgrades of minor versions: Whether to allow auto upgrades of minor versions for the extension.
-6. Application parameters (optional): Parameters are optional, for a quick start, the application can be launched with the default configuration. The link below lists the parameters that can be configured during installation for advanced customization. <https://github.com/bitnami/charts/tree/main/bitnami/minio>
+6. Application parameters (optional): Parameters are optional, for a quick start, the application can be launched with the default configuration. The link below lists the parameters that can be configured during installation for advanced customization. [charts/bitnami/minio at main · bitnami/charts](https://github.com/bitnami/charts/tree/main/bitnami/minio#parameters)
 7. Enable multi line values: Enable this option when some of the parameter values specified above need to be multi line strings. It will be activated or deactivated for new rows.
 
 ![ui4](../images/minio/image4.png)
@@ -120,23 +120,22 @@ To install the AKS extension, input the following command into the command line:
 
 ```console
 az k8s-extension create  
-  --name \[insert extension name\]  
-  --extension-type Bitnami. MinIOMain  
-  --scope namespace  
-  --cluster-name \[insert existing AKS cluster name\]  
-  --resource-group \[insert resource group name\]  
-  --cluster-type managedClusters  
-  --plan-name main  
-  --plan-product minio-cnab
-  --plan-publisher bitnami  
-  --target-namespace minio
-
+  --name \[insert extension name\]  
+  --extension-type Bitnami. MinIOMain  
+  --scope namespace  
+  --cluster-name \[insert existing AKS cluster name\]  
+  --resource-group \[insert resource group name\]  
+  --cluster-type managedClusters  
+  --plan-name main  
+  --plan-product minio-cnab
+  --plan-publisher bitnami  
+  --target-namespace minio
 (optional) --configuration-settings \[insert configuration settings\]
 ```
 
 Make sure to replace the placeholders (e.g., `[insert extension name]`, `[insert existing AKS cluster name]`, `[insert resource group name]`) with your specific details.
 
-Example: `az k8s-extension create --name minio2 --extension-type Bitnami.MinIO --scope namespace --cluster-name myAKScluster --resource-group myResourceGroup --cluster-type managedClusters --plan-name main --plan-product minio-cnab --plan-publisher bitnami --target-namespace minio --configuration-settings replicaCount=2 memoryHighWatermark.enabled="true" memoryHighWatermark.type="absolute" memoryHighWatermark.value="512Mi"`
+Example: `az k8s-extension create --name minio --extension-type Bitnami.MinIO --scope namespace --cluster-name myAKScluster --resource-group myResourceGroup --cluster-type managedClusters --plan-name main --plan-product minio-cnab --plan-publisher bitnami --target-namespace minio --configuration-settings replicaCount=2 memoryHighWatermark.enabled="true" memoryHighWatermark.type="absolute" memoryHighWatermark.value="512Mi"`
 
 ### Terraform deployment
 
@@ -154,7 +153,7 @@ terraform init  
 ```
 
 1. Create a new directory for your Terraform configuration files and navigate to it.
-2. Create a file named main.tf containing the following:
+2. Create a file named `main.tf` containing the following:
 
 ```text
 provider "azurerm" {

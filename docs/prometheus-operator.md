@@ -152,7 +152,7 @@ terraform init  
 
 1. Create a new directory for your Terraform configuration files and navigate to it.
 
-2. Create a file named main.tf containing the following:
+2. Create a file named `main.tf` containing the following:
 
 ```text
 provider "azurerm" {
