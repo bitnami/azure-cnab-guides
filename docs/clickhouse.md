@@ -1,6 +1,17 @@
 # Deploy ClickHouse on an Azure Kubernetes Service (AKS) Cluster using Bitnami Marketplace K8s application
 
-This guide demonstrates how to deploy ClickHouse on an Azure Kubernetes Service (AKS) cluster using the Bitnami ClickHouse Helm chart and includes instructions for basic usage such as creating and consuming messages.  
+This guide demonstrates how to deploy ClickHouse on an Azure Kubernetes Service (AKS) cluster using the Bitnami ClickHouse Helm chart and includes instructions for basic usage.
+
+ClickHouse is an open-source column-oriented OLAP database management system. It can boost your database performance while providing linear scalability and hardware efficiency.
+
+## Prerequisites
+
+Before you begin, ensure you have the following:
+
+1. **Kubernetes cluster**: A running AKS Kubernetes cluster
+2. **kubectl**: The Kubernetes command-line tool is installed and configured to interact with your cluster. You can use [az aks install-cli](https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest%22%20\l%20%22az-aks-install-cli) command to download and install [kubectl](https://kubernetes.io/docs/reference/kubectl/introduction/) and [kubelogin](https://learn.microsoft.com/en-us/azure/aks/kubelogin-authentication) tools.
+3. **PV provisioner** support in the underlying infrastructure
+4. **ReadWriteMany volumes** for deployment scaling
 
 ## Deployment
 
@@ -163,20 +174,20 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
-resource "azurerm_kubernetes_cluster_extension" "clickhouse" {  
-  name                  = "\[insert extension name\]"  
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id  
-  extension_type        = "Bitnami.ClickHouseMain"  
-  scope {  
-    namespace = "clickhouse"  
-  }  
-  plan {  
-    name      = "main"  
-    product   = "clickhouse-cnab"  
-    publisher = "bitnami"  
-  }  
-  configuration_settings = {  
-    \# Add any configuration settings here  
+resource "azurerm_kubernetes_cluster_extension" "clickhouse" {
+  name                  = "\[insert extension name\]"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
+  extension_type        = "Bitnami.ClickHouseMain"
+  scope {
+    namespace = "clickhouse"
+  }
+  plan {
+    name      = "main"
+    product   = "clickhouse-cnab"
+    publisher = "bitnami"
+  }
+  configuration_settings = {
+    \# Add any configuration settings here
   }
 }
 ```
@@ -194,3 +205,243 @@ resource "azurerm_kubernetes_cluster_extension" "clickhouse" {
 ```console
 terraform apply 
 ```
+
+### Access ClickHouse
+
+1. Get ClickHouse credentials:
+
+```console
+echo "Username: default"
+echo "Password: $(kubectl get secret --namespace default my-clickhouse -o jsonpath="{.data.admin-password}" | base64 -d)"
+```
+
+1. Access one of the ClickHouse pods by running:
+
+```console
+kubectl exec my-clickhouse-shard0-0 -it -- /bin/bash
+```
+
+1. Once inside the clickhouse container, you can invoke the clickhouse-client binary. You will be prompted to enter the password (obtained above):
+
+![console1](../images/clickhouse/image6.png)
+
+### Create a table
+
+Use `CREATE TABLE` to define a new table. Typical SQL DDL commands work in ClickHouse with one addition - tables in ClickHouse require an `ENGINE` clause. Use `MergeTree` to take advantage of the performance benefits of ClickHouse:
+
+![console2](../images/clickhouse/image7.png)
+
+### Insert data
+
+You can use the familiar `INSERT INTO TABLE` command with ClickHouse, but it is important to understand that each insert into a MergeTree table causes a part (folder) to be created in storage. To minimize parts, bulk insert lots of rows at a time (tens of thousands or even millions at once).
+
+![console3](../images/clickhouse/image8.png)
+
+### Query your new table
+
+You can write a `SELECT` query just like you would with any SQL database:
+
+![console4](../images/clickhouse/image9.png)
+
+## Configuration and installation details
+
+### Resource requests and limits
+
+Bitnami charts allow setting resource requests and limits for all containers inside the chart deployment. These are inside the `resources` value (check parameter table). Setting requests is essential for production workloads and these should be adapted to your specific use case.
+
+To make this process easier, the chart contains the `resourcesPreset` values, which automatically sets the `resources` section according to different presets. Check these presets in [the bitnami/common chart](https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15). However, in production workloads using `resourcesPreset` is discouraged as it may not fully adapt to your specific needs. Find more information on container resource management in the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
+
+### Pod affinity
+
+This chart allows you to set your custom affinity using the `affinity` parameter. Find more information about Pod affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
+
+As an alternative, use one of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/main/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
+
+### Scale horizontally
+
+To horizontally scale the ClickHouse deployment once it has been deployed, two options are available:
+
+- Use the `kubectl scale` command.
+- Upgrade the chart by modifying the `replicaCount` parameter.
+
+```yaml
+replicaCount: 3
+auth:
+  password: "password"
+```
+
+> [!NOTE]
+> It is mandatory to specify the password that was set the first time the chart was installed when upgrading the chart. Otherwise, new pods won't be able to join the cluster. See the above example where auth.password is set alongside with `replicaCount`.
+
+### Update credentials
+
+Bitnami charts configure credentials at first boot. Any further change in the secrets or credentials require manual intervention. Follow these instructions:
+
+- Update the user password following [the upstream documentation](https://clickhouse.com/docs/en/sql-reference/statements/alter/user)
+- Update the password secret with the new values (replace the SECRET_NAME, and PASSWORD placeholders)
+
+```console
+kubectl create secret generic SECRET_NAME --from-literal=admin-password=PASSWORD --dry-run -o yaml | kubectl apply -f -
+```
+
+### ClickHouse keeper support
+
+You can set `keeper.enabled` to use ClickHouse keeper. If `keeper.enabled=true`, Zookeeper settings will be ignore.
+
+### External Zookeeper support
+
+You may want to have ClickHouse connect to an external zookeeper rather than installing one inside your cluster. Typical reasons for this are to use a managed database service, or to share a common database server for all your applications. To achieve this, the chart allows you to specify credentials for an external database with the `externalZookeeper` parameter. You should also disable the Zookeeper installation with the `zookeeper.enabled` option. Here is an example:
+
+```yaml
+zookeper:
+  enabled: false
+externalZookeeper:
+  host: myexternalhost
+  user: myuser
+  password: mypassword
+  database: mydatabase
+  port: 3306
+```
+
+### Ingress without TLS
+
+For using ingress (example without TLS):
+
+```yaml
+ingress:
+  ## If true, ClickHouse server Ingress will be created
+  ##
+  enabled: true
+
+  ## ClickHouse server Ingress annotations
+  ##
+  annotations: {}
+  #   kubernetes.io/ingress.class: nginx
+  #   kubernetes.io/tls-acme: 'true'
+
+  ## ClickHouse server Ingress hostnames
+  ## Must be provided if Ingress is enabled
+  ##
+  hosts:
+    - clickhouse.domain.com
+```
+
+### Ingress TLS
+
+If your cluster allows automatic creation/retrieval of TLS certificates, please refer to the documentation for that mechanism.
+
+To manually configure TLS, first create/retrieve a key & certificate pair for the address(es) you wish to protect. Then create a TLS secret (named `clickhouse-server-tls` in this example) in the namespace. Include the secret's name, along with the desired hostnames, in the Ingress TLS section of your custom `values.yaml` file:
+
+```yaml
+ingress:
+  ## If true, ClickHouse server Ingress will be created
+  ##
+  enabled: true
+
+  ## ClickHouse server Ingress annotations
+  ##
+  annotations: {}
+  #   kubernetes.io/ingress.class: nginx
+  #   kubernetes.io/tls-acme: 'true'
+
+  ## ClickHouse server Ingress hostnames
+  ## Must be provided if Ingress is enabled
+  ##
+  hosts:
+    - clickhouse.domain.com
+
+  ## ClickHouse server Ingress TLS configuration
+  ## Secrets must be manually created in the namespace
+  ##
+  tls:
+    - secretName: clickhouse-server-tls
+      hosts:
+        - clickhouse.domain.com
+```
+
+### Enable TLS support
+
+This chart facilitates the creation of TLS secrets for use with the Ingress controller (although this is not mandatory). There are several common use cases:
+
+- Generate certificate secrets based on chart parameters.
+- Enable externally generated certificates.
+- Manage application certificates via an external service (like [cert-manager](https://github.com/jetstack/cert-manager/)).
+- Create self-signed certificates within the chart (if supported).
+
+In the first two cases, a certificate and a key are needed. Files are expected in `.pem` format.
+
+Here is an example of a certificate file:
+
+> [!NOTE]
+> There may be more than one certificate if there is a certificate chain.
+
+```text
+-----BEGIN CERTIFICATE-----
+MIID6TCCAtGgAwIBAgIJAIaCwivkeB5EMA0GCSqGSIb3DQEBCwUAMFYxCzAJBgNV
+...
+jScrvkiBO65F46KioCL9h5tDvomdU1aqpI/CBzhvZn1c0ZTf87tGQR8NK7v7
+-----END CERTIFICATE-----
+```
+
+Here is an example of a certificate key:
+
+```text
+-----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEAvLYcyu8f3skuRyUgeeNpeDvYBCDcgq+LsWap6zbX5f8oLqp4
+...
+wrj2wDbCDCFmfqnSJ+dKI3vFLlEz44sAV8jX/kd4Y6ZTQhlLbYc=
+-----END RSA PRIVATE KEY-----
+```
+
+- If using Helm to manage the certificates based on the parameters, copy these values into the `certificate` and `key` values for a given `*.ingress.secrets` entry.
+- If managing TLS secrets separately, it is necessary to create a TLS secret with name `INGRESS_HOSTNAME-tls` (where INGRESS_HOSTNAME is a placeholder to be replaced with the hostname you set using the `*.ingress.hostname` parameter).
+- If your cluster has a [cert-manager](https://github.com/jetstack/cert-manager) add-on to automate the management and issuance of TLS certificates, add to `*.ingress.annotations` the [corresponding ones](https://cert-manager.io/docs/usage/ingress/#supported-annotations) for cert-manager.
+- If using self-signed certificates created by Helm, set both `*.ingress.tls` and `*.ingress.selfSigned` to `true`.
+
+### Backup and restore
+
+To back up and restore Helm chart deployments on Kubernetes, you need to back up the persistent volumes from the source deployment and attach them to a new deployment using [Velero](https://velero.io/), a Kubernetes backup/restore tool. Find the instructions for using Velero in [this guide](https://techdocs.broadcom.com/us/en/vmware-tanzu/application-catalog/tanzu-application-catalog/services/tac-doc/apps-tutorials-backup-restore-deployments-velero-index.html).
+
+### Using custom scripts
+
+For advanced operations, the Bitnami ClickHouse chart allows using custom init and start scripts that will be mounted in `/docker-entrypoint.initdb.d` and `/docker-entrypoint.startdb.d` . The `init` scripts will be run on the first boot whereas the `start` scripts will be run on every container start. For adding the scripts directly as values use the `initdbScripts` and `startdbScripts` values. For using Secrets use the `initdbScriptsSecret` and `startdbScriptsSecret`.
+
+```yaml
+initdbScriptsSecret: init-scripts-secret
+startdbScriptsSecret: start-scripts-secret
+```
+
+### Additional environment variables
+
+In case you want to add extra environment variables (useful for advanced operations like custom init scripts), you can use the `extraEnvVars` property.
+
+```yaml
+clickhouse:
+  extraEnvVars:
+    - name: LOG_LEVEL
+      value: error
+```
+
+Alternatively, you can use a ConfigMap or a Secret with the environment variables. To do so, use the `extraEnvVarsCM` or the `extraEnvVarsSecret` values.
+
+### Persistence
+
+The [Bitnami ClickHouse](https://github.com/bitnami/containers/tree/main/bitnami/clickhouse) image stores the ClickHouse data and configurations at the `/bitnami` path of the container. Persistent Volume Claims are used to keep the data across deployments. This is known to work in GCE, AWS, and minikube.
+
+### Prometheus metrics
+
+This chart can be integrated with Prometheus by setting `metrics.enabled` to `true`. This will expose Clickhouse native Prometheus endpoint in the service. It will have the necessary annotations to be automatically scraped by Prometheus.
+
+#### Prometheus requirements
+
+It is necessary to have a working installation of Prometheus or Prometheus Operator for the integration to work. Install the [Bitnami Prometheus helm chart](https://github.com/bitnami/charts/tree/main/bitnami/prometheus) or the [Bitnami Kube Prometheus helm chart](https://github.com/bitnami/charts/tree/main/bitnami/kube-prometheus) to easily have a working Prometheus in your cluster.
+
+#### Integration with Prometheus Operator
+
+The chart can deploy `ServiceMonitor` objects for integration with Prometheus Operator installations. To do so, set the value `metrics.serviceMonitor.enabled=true`. Ensure that the Prometheus Operator `CustomResourceDefinitions` are installed in the cluster or it will fail with the following error:
+
+```text
+no matches for kind "ServiceMonitor" in version "monitoring.coreos.com/v1"
+```
+
+Install the [Bitnami Kube Prometheus helm chart](https://github.com/bitnami/charts/tree/main/bitnami/kube-prometheus) for having the necessary CRDs and the Prometheus Operator.

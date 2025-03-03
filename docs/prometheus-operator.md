@@ -1,7 +1,7 @@
 # Deploy Prometheus Operator on an Azure Kubernetes Service (AKS) Cluster using Bitnami Marketplace K8s application
 
-This guide demonstrates how to deploy Prometheus Operator on an Azure Kubernetes Service (AKS) cluster using the Bitnami Prometheus Operator Helm chart and includes instructions for basic usage such as creating and consuming messages.  
-  
+This guide demonstrates how to deploy Prometheus Operator on an Azure Kubernetes Service (AKS) cluster using the Bitnami Prometheus Operator Helm chart and includes instructions for basic usage.
+
 Prometheus Operator provides easy monitoring definitions for Kubernetes services and deployment and management of Prometheus instances.
 
 ## Prerequisites
