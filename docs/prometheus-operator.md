@@ -216,7 +216,7 @@ terraform apply 
 
 1. In the same way, Alertmanager is accessible at port 9093:
 
-![ui6](../images/prometheus-operator/image6.png)
+![ui7](../images/prometheus-operator/image7.png)
 
 ## Configuration and installation details
 
