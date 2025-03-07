@@ -221,6 +221,9 @@ echo "Password: $(kubectl get secret --namespace default my-clickhouse -o jsonpa
 kubectl exec my-clickhouse-shard0-0 -it -- /bin/bash
 ```
 
+> [!IMPORTANT]
+> Depending on the deployment parameters, you may need to adjust the above commands, such as changing the namespace or deployment name.
+
 1. Once inside the clickhouse container, you can invoke the clickhouse-client binary. You will be prompted to enter the password (obtained above):
 
 ![console1](../images/clickhouse/image6.png)
@@ -423,10 +426,6 @@ clickhouse:
 ```
 
 Alternatively, you can use a ConfigMap or a Secret with the environment variables. To do so, use the `extraEnvVarsCM` or the `extraEnvVarsSecret` values.
-
-### Persistence
-
-The [Bitnami ClickHouse](https://github.com/bitnami/containers/tree/main/bitnami/clickhouse) image stores the ClickHouse data and configurations at the `/bitnami` path of the container. Persistent Volume Claims are used to keep the data across deployments. This is known to work in GCE, AWS, and minikube.
 
 ### Prometheus metrics
 

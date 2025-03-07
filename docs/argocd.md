@@ -214,8 +214,11 @@ terraform apply 
 
 ```console
 echo "Username: \"admin\""
-echo "Password: $(kubectl -n default get secret argocd-secret -o jsonpath="{.data.clearPassword}" \| base64 -d)"
+echo "Password: $(kubectl --namespace default get secret argocd-secret -o jsonpath="{.data.clearPassword}" \| base64 -d)"
 ```
+
+> [!IMPORTANT]
+> Depending on the deployment parameters, you may need to adjust the above commands, such as changing the namespace or deployment name.
 
 1. Access ArgoCD UI with the above-obtained credentials:
 

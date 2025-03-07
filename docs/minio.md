@@ -218,6 +218,9 @@ export ROOT_USER=\$(kubectl get secret --namespace default my-minio -o jsonpath=
 export ROOT_PASSWORD=\$(kubectl get secret --namespace default my-minio -o jsonpath="{.data.root-password}" \| base64 -d)
 ```
 
+> [!IMPORTANT]
+> Depending on the deployment parameters, you may need to adjust the above commands, such as changing the namespace or deployment name.
+
 1. Access MinIO&reg; UI with the above-obtained credentials:
 
 ![ui6](../images/minio/image6.png)
@@ -343,13 +346,6 @@ Alternatively, you can use a ConfigMap or a Secret with the environment variable
 ### Deploying extra resources
 
 There are cases where you may want to deploy extra objects, such a ConfigMap containing your app's configuration or some extra deployment with a micro service used by your app. For covering this case, the chart allows adding the full specification of other objects using the `extraDeploy` parameter.
-
-## Persistence
-
-The [Bitnami Object Storage based on MinIO(&reg;)](https://github.com/bitnami/containers/tree/main/bitnami/minio) image stores data at the `/bitnami/minio/data` path of the container by default.
-This can be modified with the `persistence.mountPath` value which modifies the `MINIO_DATA_DIR` environment variable of the container.
-
-The chart mounts a [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) at this location so that data within MinIO is persistent. The volume is created using dynamic volume provisioning.
 
 ### ​​Adjust permissions of persistent volume mountpoint
 

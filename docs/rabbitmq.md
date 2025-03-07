@@ -223,6 +223,9 @@ kubectl port-forward --namespace default svc/my-rabbitmq 15672:15672
 
 Now, open your browser and go to <http://127.0.0.1:15672>. Log in using the credentials obtained earlier
 
+> [!IMPORTANT]
+> Depending on the deployment parameters, you may need to adjust the above commands, such as changing the namespace or deployment name.
+
 ### Send and Receive Messages in RabbitMQ
 
 #### Create a queue
@@ -516,12 +519,6 @@ Note that forcing nodes to boot is **not a solution** and doing so **can be dang
 ### Password management
 
 Changing the password through RabbitMQ's UI can make the pod fail due to the default liveness probes. If you do so, remember to make the chart aware of the new password. Updating the default secret with the password you set through RabbitMQ's UI will automatically recreate the pods. If you are using your own secret, you may have to manually recreate the pods.
-
-## Persistence
-
-The [Bitnami RabbitMQ](https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq) image stores the RabbitMQ data and configurations at the `/opt/bitnami/rabbitmq/var/lib/rabbitmq/` path of the container.
-
-The chart mounts a [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) at this location. By default, the volume is created using dynamic volume provisioning. An existing PersistentVolumeClaim can also be defined.
 
 ### Use existing PersistentVolumeClaims
 
