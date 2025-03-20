@@ -98,13 +98,13 @@ Instructions
 1. Create a resource group
 
 ```console
-az group create  --name \[insert resource group name\] --location \[insert location\]
+az group create  --name [insert resource group name] --location [insert location]
 ```
 
 1. Deploy the ARM Template
 
 ```console
-az deployment group create --resource-group \[insert resource group name\] --template-file \[path to ARM template file\]
+az deployment group create --resource-group [insert resource group name] --template-file [path to ARM template file]
 ```
 
 ### Installing the Bitnami package for MinIO&reg; extension using Azure CLI
@@ -119,18 +119,19 @@ Before you begin, ensure you have the following:
 To install the AKS extension, input the following command into the command line:
 
 ```console
-az k8s-extension create  
-  --name \[insert extension name\]  
-  --extension-type Bitnami. MinIOMain  
-  --scope namespace  
-  --cluster-name \[insert existing AKS cluster name\]  
-  --resource-group \[insert resource group name\]  
-  --cluster-type managedClusters  
-  --plan-name main  
+az k8s-extension create
+  --name [insert extension name]
+  --extension-type Bitnami.MinIOMain
+  --scope namespace
+  --cluster-name [insert existing AKS cluster name]
+  --resource-group [insert resource group name]
+  --cluster-type managedClusters
+  --plan-name main
   --plan-product minio-cnab
-  --plan-publisher bitnami  
+  --plan-publisher bitnami
   --target-namespace minio
-(optional) --configuration-settings \[insert configuration settings\]
+
+(optional) --configuration-settings [insert configuration settings]
 ```
 
 Make sure to replace the placeholders (e.g., `[insert extension name]`, `[insert existing AKS cluster name]`, `[insert resource group name]`) with your specific details.
@@ -161,9 +162,9 @@ provider "azurerm" {
 }
 
 resource "azurerm_kubernetes_cluster" "aks" {
-  name                = "\[insert existing AKS cluster name\]"
-  location            = "\[insert location\]"
-  resource_group_name = "\[insert resource group name\]"
+  name                = "[insert existing AKS cluster name]"
+  location            = "[insert location]"
+  resource_group_name = "[insert resource group name]"
   dns_prefix          = "aks"
 
   default_node_pool {
@@ -178,7 +179,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 }
 
 resource "azurerm_kubernetes_cluster_extension" " minio" {
-  name                 = "\[insert extension name\]"
+  name                 = "[insert extension name]"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
   extension_type       = "Bitnami.MinIOMain"
   scope {
