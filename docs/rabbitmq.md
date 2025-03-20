@@ -96,13 +96,13 @@ Instructions
 1. Create a resource group
 
 ```console
-az group create  --name \[insert resource group name\] --location \[insert location\]
+az group create  --name [insert resource group name] --location [insert location]
 ```
 
 1. Deploy the ARM Template
 
 ```console
-az deployment group create --resource-group \[insert resource group name\] --template-file \[path to ARM template file\]
+az deployment group create --resource-group [insert resource group name] --template-file [path to ARM template file]
 ```
 
 ### Installing the Bitnami package for RabbitMQ extension using Azure CLI
@@ -118,22 +118,23 @@ To install the AKS extension, input the following command into the command line:
 
 ```console
 az k8s-extension create
---name \[insert extension name\]
+  --name [insert extension name]
   --extension-type Bitnami.RabbitmqMain
   --scope namespace
-  --cluster-name \[insert existing AKS cluster name\]
-  --resource-group \[insert resource group name\]
+  --cluster-name [insert existing AKS cluster name]
+  --resource-group [insert resource group name]
   --cluster-type managedClusters
   --plan-name main
   --plan-product rabbitmq-cnab
   --plan-publisher bitnami
   --target-namespace rabbitmq
-(optional) --configuration-settings \[insert configuration settings\]
+
+(optional) --configuration-settings [insert configuration settings]
 ```
 
 Make sure to replace the placeholders (e.g., `[insert extension name]`, `[insert existing AKS cluster name]`, `[insert resource group name]`) with your specific details.
 
-Example: `az k8s-extension create --name rabbitmq2 --extension-type Bitnami.RabbitmqMain --scope namespace --cluster-name myAKScluster --resource-group myResourceGroup --cluster-type managedClusters --plan-name main --plan-product rabbitmq-cnab --plan-publisher bitnami --target-namespace rabbitmq --configuration-settings replicaCount=2 memoryHighWatermark.enabled="true" memoryHighWatermark.type="absolute" memoryHighWatermark.value="512Mi"`
+Example: `az k8s-extension create --name rabbitmq --extension-type Bitnami.RabbitmqMain --scope namespace --cluster-name myAKScluster --resource-group myResourceGroup --cluster-type managedClusters --plan-name main --plan-product rabbitmq-cnab --plan-publisher bitnami --target-namespace rabbitmq --configuration-settings replicaCount=2 memoryHighWatermark.enabled="true" memoryHighWatermark.type="absolute" memoryHighWatermark.value="512Mi"`
 
 ### Terraform deployment
 
@@ -159,9 +160,9 @@ provider "azurerm" {
 }
 
 resource "azurerm_kubernetes_cluster" "aks" {
-  name                = "\[insert existing AKS cluster name\]"
-  location            = "\[insert location\]"
-  resource_group_name = "\[insert resource group name\]"
+  name                = "[insert existing AKS cluster name]"
+  location            = "[insert location]"
+  resource_group_name = "[insert resource group name]"
   dns_prefix          = "aks"
   default_node_pool {
     name       = "default"
@@ -175,7 +176,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 }
 
 resource "azurerm_kubernetes_cluster_extension" "rabbitmq" {
-  name              = "\[insert extension name\]"
+  name              = "[insert extension name]"
   cluster_id        = azurerm_kubernetes_cluster.aks.id
   extension_type    = "Bitnami.RabbitmqMain"
   release_namespace = "rabbitmq"

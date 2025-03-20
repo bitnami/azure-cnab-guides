@@ -96,13 +96,13 @@ Instructions
 1. Create a resource group
 
 ```console
-az group create  --name \[insert resource group name\] --location \[insert location\] 
+az group create  --name [insert resource group name] --location [insert location] 
 ```
 
 1. Deploy the ARM Template
 
 ```console
-az deployment group create --resource-group \[insert resource group name\] --template-file \[path to ARM template file\] 
+az deployment group create --resource-group [insert resource group name] --template-file [path to ARM template file] 
 ```
 
 ### Installing the Bitnami package for ArgoCD extension using Azure CLI
@@ -117,24 +117,24 @@ Before you begin, ensure you have the following:
 To install the AKS extension, input the following command into the command line:
 
 ```console
-az k8s-extension create  
-  --name \[insert extension name\]  
-  --extension-type Bitnami.ArgoCDMain  
-  --scope namespace  
-  --cluster-name \[insert existing AKS cluster name\]  
-  --resource-group \[insert resource group name\]  
-  --cluster-type managedClusters  
-  --plan-name main  
-  --plan-product clickhouse-cnab 
-  --plan-publisher bitnami  
-  --target-namespace clickhouse 
+az k8s-extension create
+  --name [insert extension name]
+  --extension-type Bitnami.ArgoCDMain
+  --scope namespace
+  --cluster-name [insert existing AKS cluster name]
+  --resource-group [insert resource group name]
+  --cluster-type managedClusters
+  --plan-name main
+  --plan-product argocd-cnab
+  --plan-publisher bitnami
+  --target-namespace argocd
 
-(optional) --configuration-settings \[insert configuration settings\] 
+(optional) --configuration-settings [insert configuration settings]
 ```
 
 Make sure to replace the placeholders (e.g., `[insert extension name]`, `[insert existing AKS cluster name]`, `[insert resource group name]`) with your specific details.
 
-Example: `az k8s-extension create --name clickhouse2 --extension-type Bitnami.ArgoCDMain --scope namespace --cluster-name myAKScluster --resource-group myResourceGroup --cluster-type managedClusters --plan-name main --plan-product clickhouse-cnab --plan-publisher bitnami --target-namespace clickhouse --configuration-settings replicaCount=2 memoryHighWatermark.enabled="true" memoryHighWatermark.type="absolute" memoryHighWatermark.value="512Mi"`
+Example: `az k8s-extension create --name argocd --extension-type Bitnami.ArgoCDMain --scope namespace --cluster-name myAKScluster --resource-group myResourceGroup --cluster-type managedClusters --plan-name main --plan-product argocd-cnab --plan-publisher bitnami --target-namespace argocd --configuration-settings replicaCount=2 memoryHighWatermark.enabled="true" memoryHighWatermark.type="absolute" memoryHighWatermark.value="512Mi"`
 
 ### Terraform deployment
 
@@ -155,43 +155,43 @@ terraform init  
 2. Create a file named `main.tf` containing the following:
 
 ```text
-provider "azurerm" { 
-  features {} 
-} 
- 
-resource "azurerm_kubernetes_cluster" "aks" { 
-  name                = "\[insert existing AKS cluster name\]" 
-  location            = "\[insert location\]" 
-  resource_group_name = "\[insert resource group name\]" 
-  dns_prefix          = "aks" 
- 
-  default_node_pool { 
-    name       = "default" 
-    node_count = 1 
-    vm_size    = "Standard_DS2_v2" 
-  } 
- 
-  identity { 
-    type = "SystemAssigned" 
-  } 
-} 
- 
-resource "azurerm_kubernetes_cluster_extension" "clickhouse" { 
-  name                 = "\[insert extension name\]" 
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id 
-  extension_type       = "Bitnami.ArgoCDMain" 
-  scope { 
-    namespace = "clickhouse" 
-  } 
-  plan { 
-    name      = "main" 
-    product   = "clickhouse-cnab" 
-    publisher = "bitnami" 
-  } 
-  configuration_settings = { 
-    \# Add any configuration settings here 
-  } 
-} 
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_kubernetes_cluster" "aks" {
+  name                = "[insert existing AKS cluster name]"
+  location            = "[insert location]"
+  resource_group_name = "[insert resource group name]"
+  dns_prefix          = "aks"
+
+  default_node_pool {
+    name       = "default"
+    node_count = 1
+    vm_size    = "Standard_DS2_v2"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+resource "azurerm_kubernetes_cluster_extension" "argocd" {
+  name                 = "[insert extension name]"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
+  extension_type       = "Bitnami.ArgoCDMain"
+  scope {
+    namespace = "argocd"
+  }
+  plan {
+    name      = "main"
+    product   = "argocd-cnab"
+    publisher = "bitnami"
+  }
+  configuration_settings = {
+    \# Add any configuration settings here
+  }
+}
 ```
 
 1. Before you test run the main.tf file, you need to update the following in the tf file:  
